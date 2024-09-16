@@ -1,19 +1,23 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import AuthForm from '@/components/AuthForms';  
-import { login as loginApi } from '@/lib/api';
+// import { login as loginApi } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'react-toastify';
 
-export default function login() {
+export default function Login() {
     const [error, setError] = useState('');
     const router = useRouter();
+    const { loginUser } = useAuth();
 
     const handleLogin = async (data) => {
         try {
-            const response = await loginApi(data);
-            localStorage.setItem('token', response.token);
-            router.push('/homePage'); 
+            await loginUser(data);
+            toast.success('Login successful!');
+            router.push('/home'); 
         } catch (err) {
             setError(err.message || 'An error occured during login, please try again.')
+            toast.error(err.message || 'An error occurred during login');
         }
     };
 
@@ -23,7 +27,7 @@ export default function login() {
           <div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Log in to your account</h2>
           </div>
-          {error && <p className="text-center text-red-600">{error}</p>}
+          {error  && <p className="text-center text-red-600">{error }</p>}
           <AuthForm onSubmit={handleLogin} isSignup={false} />
         </div>
       </div>
