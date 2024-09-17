@@ -40,9 +40,17 @@ router.post('/signup', (req, res, next) => {
         return User.create({ email, password: hashedPassword, firstName, lastName });
     })
     .then((createdUser) => {
-        const { email, firstName, lastName, _id } = createdUser;
-        const user = { email, firstName, lastName, _id };
-        res.status(201).json({ user: user});
+        const { _id, email, firstName, lastName } = createdUser;
+        const payload = { _id, email, firstName, lastName };
+        const authToken = jwt.sign(
+            payload,
+            process.env.TOKEN_SECRET,
+            { algorithm: 'HS256', expiresIn: '24h'}
+        );
+        res.status(201).json({ 
+            authToken: authToken,
+            user: { _id, email, firstName, lastName }
+        });
     })
     .catch(err => {
         console.log(err);
@@ -75,7 +83,10 @@ router.post('/login', (req, res, next) => {
                 process.env.TOKEN_SECRET,
                 { algorithm: 'HS256', expiresIn: '24h'}
             );
-            res.status(200).json({ authToken: authToken});
+            res.status(200).json({ 
+                authToken: authToken,
+                user: {_id, email, firstName, lastName }
+            });
         }
         else {
             res.status(401).json({ message: 'Unable to authenticate user, please try again.'})

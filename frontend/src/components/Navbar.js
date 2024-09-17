@@ -4,13 +4,20 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import styles from './Navbar.module.css';
+import { useEffect, useState } from 'react';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
     const router = useRouter();
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
+ 
+    useEffect(() => {
+      setIsLoggedIn(!!user);
+    }, [user]);
 
     const handleLogout = () => {
         logout();
+        setIsLoggedIn(false);
         router.push('/');
     };
 

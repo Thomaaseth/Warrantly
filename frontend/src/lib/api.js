@@ -23,10 +23,10 @@ export const signup = async (userData) => {
 export const login = async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials);
-      console.log('Login response:', response);  // Log the entire response
+      console.log('Login response:', response);
       return response.data;
     } catch (error) {
-      console.error('Login error:', error.response || error);  // Log the error or error response
+      console.error('Login error:', error.response || error);
       if (error.response) {
         throw error.response.data;
       } else {
