@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthForm from '@/components/AuthForms';
-// import { signup } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-toastify';
+import { TOAST_MESSAGES } from '@/utils/toastMessage';
+import styles from './Signup.module.css'
 
 export default function Signup() {
     const [error, setError] = useState('');
@@ -18,20 +19,23 @@ export default function Signup() {
             toast.success(TOAST_MESSAGES.SIGNUP_SUCCESS);
             router.push('/login');
         } catch (err) {
-            setError(err.message || 'An error occured during signup. Please try again.');
-            toast.error('An error occurred during signup.')
+            console.error('Signup error:', err);
+            setError(err.message || 'An error occurred during signup');
+            if (err.message === 'User already exists.') {
+                toast.error(TOAST_MESSAGES.ACCOUNT_EXISTS);
+            } else {
+                toast.error(TOAST_MESSAGES.GENERIC_ERROR);
+            }
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign up for an account</h2>
-          </div>
-          {error && <p className="text-center text-red-600">{error}</p>}
-          <AuthForm onSubmit={handleSignup} isSignup={true} />
+        <div className={styles.container}>
+            <div className={styles.formWrapper}>
+                <h2 className={styles.title}>Sign up for an account</h2>
+                {error && <p className={styles.error}>{error}</p>}
+                <AuthForm onSubmit={handleSignup} isSignup={true} />
+            </div>
         </div>
-      </div>
-    )
+    );
 }

@@ -46,10 +46,10 @@ const Navbar = () => {
                     ) : (
                         <>
                             <Link href="/login" className={styles.navLink}>
-                                Login
+                                Log In
                             </Link>
                             <Link href="/signup" className={styles.navLink}>
-                                Signup
+                                Sign Up
                             </Link>
                         </>
                     )}

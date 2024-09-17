@@ -29,33 +29,42 @@ router.post('/signup', (req, res, next) => {
         return;
     }
 
-    User.findOne({ email }).then((foundUser) => {
-        if (foundUser) {
-            res.status(400).json({ message: 'User already exists.'});
-            return;
-        }
+    User.findOne({ email })
+        .then((foundUser) => {
+            if (foundUser) {
+                throw new Error('User already exists.');
+            }
 
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const hashedPassword = bcrypt.hashSync(password, salt);
-        return User.create({ email, password: hashedPassword, firstName, lastName });
-    })
-    .then((createdUser) => {
-        const { _id, email, firstName, lastName } = createdUser;
-        const payload = { _id, email, firstName, lastName };
-        const authToken = jwt.sign(
-            payload,
-            process.env.TOKEN_SECRET,
-            { algorithm: 'HS256', expiresIn: '24h'}
-        );
-        res.status(201).json({ 
-            authToken: authToken,
-            user: { _id, email, firstName, lastName }
+            const salt = bcrypt.genSaltSync(saltRounds);
+            const hashedPassword = bcrypt.hashSync(password, salt);
+            return User.create({ email, password: hashedPassword, firstName, lastName });
+        })
+
+        .then((createdUser) => {
+            if (!createdUser) {
+                return res.status(500).json({ message: 'Error creating user.' });
+            }
+
+            const { _id, email, firstName, lastName } = createdUser;
+            const payload = { _id, email, firstName, lastName };
+            const authToken = jwt.sign(
+                payload,
+                process.env.TOKEN_SECRET,
+                { algorithm: 'HS256', expiresIn: '24h' }
+            );
+            res.status(201).json({ 
+                authToken: authToken,
+                user: { _id, email, firstName, lastName }
+            });
+        })
+        .catch(err => {
+            if (err.message === 'User already exists.') {
+                res.status(400).json({ message: 'User already exists.'});
+            } else {
+                console.log(err);
+                res.status(500).json({ message: 'Internal server error'});
+            }
         });
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({ message: 'Internal server error'});
-    });
 });
 
 
@@ -71,7 +80,7 @@ router.post('/login', (req, res, next) => {
     User.findOne({ email })
     .then((foundUser) => {
         if (!foundUser) {
-            res.status(401).json({ message: 'User not found, please sign up.'});
+            res.status(401).json({ message: 'USER_NOT_FOUND'});
             return;
         }
         const passwordCorrect = bcrypt.compareSync(password, foundUser.password);
@@ -89,7 +98,7 @@ router.post('/login', (req, res, next) => {
             });
         }
         else {
-            res.status(401).json({ message: 'Unable to authenticate user, please try again.'})
+            res.status(401).json({ message: 'INCORRECT_PASSWORD'})
         }
     })
     .catch(err => res.status(500).json({ message: 'Internal server error'}));

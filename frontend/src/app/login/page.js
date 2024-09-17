@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { login } from '@/lib/api';
 import { toast } from 'react-toastify';
 import { TOAST_MESSAGES } from '@/utils/toastMessage';
+import styles from './Login.module.css'
 
 export default function Login() {
 
@@ -16,37 +17,43 @@ export default function Login() {
 
     const handleLogin = async (data) => {
         try {
-            // First, call the API directly
             const apiResponse = await login(data);
             console.log('API Response:', apiResponse);
-
-            // Check if the response contains the expected data
+    
             if (apiResponse.authToken && apiResponse.user) {
-                console.log('Auth Token:', apiResponse.authToken);
-                console.log('User Data:', apiResponse.user);
+                await loginUser(apiResponse);
+                toast.success(TOAST_MESSAGES.LOGIN_SUCCESS);
+                router.push('/');
             } else {
                 console.log('API response does not contain expected data structure');
+                throw new Error('Invalid response from server');
             }
-
-            // Then proceed with the existing login logic
-            await loginUser(data);
-            toast.success(TOAST_MESSAGES.LOGIN_SUCCESS);
-            router.push('/'); 
         } catch (err) {
             console.error('Login error:', err);
-            setError(err.message || 'An error occurred during login, please try again.')
-            toast.error(err.message || 'An error occurred during login');
-        }
-    };
+            
+                switch(err.message) {
+                    case 'USER_NOT_FOUND':
+                        setError('No account found with this email. Please sign up.');
+                        toast.error(TOAST_MESSAGES.NO_USER);
+                        break;
+                    case 'INCORRECT_PASSWORD':
+                        setError('Incorrect password. Please try again.');
+                        toast.error(TOAST_MESSAGES.WRONG_PASSWORD);
+                        break;
+                    default:
+                        setError(err.message || 'An error occurred during login. Please try again.');
+                        toast.error(TOAST_MESSAGES.GENERIC_ERROR);
+                }         
+            }     
+        };
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Log in to your account</h2>
-          </div>
-          {error  && <p className="text-center text-red-600">{error }</p>}
-          <AuthForm onSubmit={handleLogin} isSignup={false} />
+        <div className={styles.container}>
+            <div className={styles.formWrapper}>
+                <h2 className={styles.title}>Log in your account</h2>
+                {error && <p className={styles.error}>{error}</p>}
+                <AuthForm onSubmit={handleLogin} isSignup={false} />
+            </div>
         </div>
-      </div>
     );
 }

@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { login, signup } from '@/lib/api';
+import { toast } from 'react-toastify';
+import { TOAST_MESSAGES } from '@/utils/toastMessage';
 
 const AuthContext = createContext();
 
@@ -16,18 +18,21 @@ export const AuthProvider = ({ children }) => {
       // Validate token with your API
       // If valid, setUser
       console.log('Token found, setting user');
-      setUser({ token }); // Temporary, replace with actual user data
+      setUser(JSON.parse(localStorage.getItem('userData')));
     }
   }, []);
 
-  const loginUser = async (credentials) => {
+  const loginUser = async (loginData) => {
     try {
-      const data = await login(credentials);
-      console.log('Login successful, user data:', data.user);
-      setUser(data.user);
-      localStorage.setItem('token', data.token);
+      // loginData should already contain the user and authToken from the API response
+      const { user, authToken } = loginData;
+      setUser(user);
+      localStorage.setItem('token', authToken);
+      localStorage.setItem('userData', JSON.stringify(user));
+      return user;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Error in loginUser:', error);
+      throw error;
     }
   };
 
@@ -35,10 +40,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await signup(userData);
       console.log('Signup successful, user data:', data.user);
-      setUser(data.user);
-      localStorage.setItem('token', data.token);
+      return data.user;
     } catch (error) {
-      console.error('Signup error:', error);
+      console.error('Signup error:', error.message);
+      throw error;
     }
   };
 
@@ -46,6 +51,8 @@ export const AuthProvider = ({ children }) => {
     console.log('Logging out, clearing user data');
     setUser(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+    toast.success(TOAST_MESSAGES.LOGOUT_SUCCESS);
   };
 
   console.log('Current user state:', user);
