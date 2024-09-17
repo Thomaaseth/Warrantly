@@ -1,9 +1,12 @@
+"use client"
+
 import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import AuthForm from '@/components/AuthForms';  
 // import { login as loginApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-toastify';
+import { TOAST_MESSAGES } from '@/utils/toastMessage';
 
 export default function Login() {
     const [error, setError] = useState('');
@@ -13,8 +16,8 @@ export default function Login() {
     const handleLogin = async (data) => {
         try {
             await loginUser(data);
-            toast.success('Login successful!');
-            router.push('/home'); 
+            toast.success(TOAST_MESSAGES.LOGIN_SUCCESS);
+            router.push('/'); 
         } catch (err) {
             setError(err.message || 'An error occured during login, please try again.')
             toast.error(err.message || 'An error occurred during login');

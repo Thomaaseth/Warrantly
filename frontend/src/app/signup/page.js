@@ -1,5 +1,7 @@
+"use client"
+
 import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import AuthForm from '@/components/AuthForms';
 // import { signup } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
@@ -13,7 +15,7 @@ export default function Signup() {
     const handleSignup = async (data) => {
         try {
             await signupUser(data);
-            toast.success('Signup succesful! Please log in.')
+            toast.success(TOAST_MESSAGES.SIGNUP_SUCCESS);
             router.push('/login');
         } catch (err) {
             setError(err.message || 'An error occured during signup. Please try again.');
