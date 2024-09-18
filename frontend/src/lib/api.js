@@ -85,3 +85,57 @@ export const deleteAccount = async () => {
         throw error.response.data;
     }
 };
+
+// Products CRUD operations
+
+export const getProducts = async () => {
+    try {
+        const response = await api.get('/api/products');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching products:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const createProduct = async (productData) => {
+    try {
+        const formData = new FormData();
+        for (const key in productData) {
+            formData.append(key, productData[key]);
+        }
+        const response = await api.post('/api/products', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error creating product:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const updateProduct = async (productId, productData) => {
+    try {
+        const formData = new FormData();
+        for (const key in productData) {
+            formData.append(key, productData[key]);
+        }
+        const response = await api.put(`/api/products/${productId}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating product:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const deleteProduct = async (productId) => {
+    try {
+        const response = await api.delete(`/api/products/${productId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting product:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};

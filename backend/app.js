@@ -30,11 +30,9 @@ app.use('/auth', authRouter);
 const allRoutes = require('./routes');
 app.use('/api', allRoutes);
 
-const projectRouter = require('./routes/project.routes');
-app.use('/api/projects', isAuthenticated, projectRouter);
+const productRoutes = require('./routes/product.routes');
+app.use('/api/products', isAuthenticated, productRoutes);
 
-const taskRouter = require('./routes/task.routes');
-app.use('/api/tasks', isAuthenticated, taskRouter);
 
 
 // Error handling
