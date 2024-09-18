@@ -5,6 +5,19 @@ const api = axios.create({
     withCredentials: true,
 });
 
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 export const signup = async (userData) => {
   try {
       const response = await api.post('/auth/signup', userData);
@@ -32,4 +45,43 @@ export const login = async (credentials) => {
           throw { message: 'An unexpected error occurred' };
       }
   }
+};
+
+export const updateEmail = async (newEmail) => {
+    try {
+        const response = await api.put('/auth/update-email', { email: newEmail });
+        console.log('Update email response:', response);
+        return response.data;
+    } catch (error) {
+        console.error('Update email error:', error.response || error);
+        if (error.response && error.response.data) {
+            throw error.response.data;
+        } else {
+            throw { message: 'An unexpected error occurred' };
+        }
+    }
+};
+
+export const changePassword = async (currentPassword, newPassword) => {
+    try {
+        const response = await api.put('/auth/change-password', { currentPassword, newPassword });
+        console.log('Change password response:', response);
+        return response.data;
+    } catch (error) {
+        console.error('Change password error:', error.response || error);
+        if (error.response && error.response.data) {
+            throw new Error(error.response.data.message);
+        } else {
+            throw new Error('An unexpected error occurred');
+        }
+    }
+};
+
+export const deleteAccount = async () => {
+    try {
+        const response = await api.delete('/auth/delete-account');
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
 };

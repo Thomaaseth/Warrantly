@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import styles from './AuthForms.module.css';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+
 
 const schema = yup.object().shape({
   email: yup
@@ -87,8 +89,8 @@ export default function AuthForm({ onSubmit, isSignup }) {
               onClick={togglePasswordVisibility}
               className={styles.passwordToggle}
               >
-                 {showPassword ? '👁️' : '👁️‍🗨️'}
-              </button>
+                 {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
             </div>
           {errors.password && <p className={styles.error}>{errors.password.message}</p>}
             {isSignup && (
