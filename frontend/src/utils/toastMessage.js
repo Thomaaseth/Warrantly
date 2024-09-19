@@ -20,4 +20,10 @@ export const TOAST_MESSAGES = {
     WRONG_PASSWORD: 'Incorrect password. Please try again.',
     PASSWORD_RESET_SUCCESS: 'Your password has been successfully reset.',
     PROFILE_UPDATE_SUCCESS: 'Your profile has been successfully updated.',
+    PRODUCT_UPDATE_SUCCESS: 'Product updated successfully',
+    PRODUCT_UPDATE_FAIL: 'Update info failed, please try again',
+    PRODUCT_DELETE_SUCCESS: 'Product deleted successfully',
+    PRODUCT_DELETE_FAIL: 'Product failed to delete, please try again',
+    PRODUCT_CREATED_SUCCESS: 'Product added',
+    PRODUCT_CREATED_FAIL: 'Product creation failed, please try again',
 };

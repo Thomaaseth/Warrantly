@@ -11,12 +11,9 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Check for token in localStorage and validate it
     const token = localStorage.getItem('token');
     console.log('Token in localStorage:', token);
     if (token) {
-      // Validate token with your API
-      // If valid, setUser
       console.log('Token found, setting user');
       setUser(JSON.parse(localStorage.getItem('userData')));
     }
@@ -24,7 +21,6 @@ export const AuthProvider = ({ children }) => {
 
   const loginUser = async (loginData) => {
     try {
-      // loginData should already contain the user and authToken from the API response
       const { user, authToken } = loginData;
       setUser(user);
       localStorage.setItem('token', authToken);
@@ -54,8 +50,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('userData');
     toast.success(TOAST_MESSAGES.LOGOUT_SUCCESS);
   };
-
-  console.log('Current user state:', user);
 
   return (
     <AuthContext.Provider value={{ user, loginUser, signupUser, logout }}>

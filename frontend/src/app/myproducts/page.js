@@ -2,82 +2,87 @@
 
 import React, { useState, useEffect } from "react";
 import { getProducts, createProduct, updateProduct, deleteProduct } from '../../lib/api'
+import { toast } from "react-toastify";
 import styles from './Products.module.css'
+import { TOAST_MESSAGES } from "@/utils/toastMessage";
 
 const MyProducts = () => {
-    const [products, setProducts] = useState([]);
-    const [newProduct, setNewProduct] = useState({
-        name: '',
-        dateBought: '',
-        warrantyDuration: '',
-        invoice: null
-    });
-    const [editingProduct, setEditingProduct] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [newProduct, setNewProduct] = useState({
+      name: '',
+      dateBought: '',
+      warrantyDuration: '',
+      invoice: null
+  });
+  const [editingProduct, setEditingProduct] = useState(null);
 
-    useEffect(() => {
-        fetchProducts();
-    }, []);
+  useEffect(() => {
+      fetchProducts();
+  }, []);
 
-    const fetchProducts = async () => {
-        try {
-            const fetchedProducts = await getProducts();
-            setProducts(fetchedProducts);
-        } catch (error) {
-            console.error("Error fetching products:", error);
-            // Handle error (e.g., show error message to user)
-        }
-    };
+  const fetchProducts = async () => {
+      try {
+          const fetchedProducts = await getProducts();
+          setProducts(fetchedProducts.data);
+      } catch (error) {
+          console.error("Error fetching products:", error);
+          toast.error("Failed to fetch products. Please try again.");
+      }
+  };
 
-    const handleInputChange = (e, isEditing = false) => {
-        const { name, value } = e.target;
-        if (isEditing) {
-            setEditingProduct(prev => ({ ...prev, [name]: value }));
-        } else {
-            setNewProduct(prev => ({ ...prev, [name]: value }));
-        }
-    };
+  const handleInputChange = (e, isEditing = false) => {
+      const { name, value } = e.target;
+      if (isEditing) {
+          setEditingProduct(prev => ({ ...prev, [name]: value }));
+      } else {
+          setNewProduct(prev => ({ ...prev, [name]: value }));
+      }
+  };
 
-    const handleFileChange = (e, isEditing = false) => {
-        if (isEditing) {
-            setEditingProduct(prev => ({ ...prev, invoice: e.target.files[0] }));
-        } else {
-            setNewProduct(prev => ({ ...prev, invoice: e.target.files[0] }));
-        }
-    };
+  const handleFileChange = (e, isEditing = false) => {
+      if (isEditing) {
+          setEditingProduct(prev => ({ ...prev, invoice: e.target.files[0] }));
+      } else {
+          setNewProduct(prev => ({ ...prev, invoice: e.target.files[0] }));
+      }
+  };
 
-    const handleCreateProduct = async (e) => {
-        e.preventDefault();
-        try {
-            await createProduct(newProduct);
-            fetchProducts();
-            setNewProduct({ name: '', dateBought: '', warrantyDuration: '', invoice: null});
-        } catch (error) {
-            console.error("Error creating product:", error);
-            // Handle error (e.g., show error message to user)
-        }
-    };
+  const handleCreateProduct = async (e) => {
+      e.preventDefault();
+      try {
+          await createProduct(newProduct);
+          fetchProducts();
+          setNewProduct({ name: '', dateBought: '', warrantyDuration: '', invoice: null});
+          toast.success(TOAST_MESSAGES.PRODUCT_CREATED_SUCCESS);
+      } catch (error) {
+          console.error("Error creating product:", error);
+          toast.error(TOAST_MESSAGES.PRODUCT_CREATED_FAIL);
+      }
+  };
 
-    const handleUpdateProduct = async (e) => {
-        e.preventDefault();
-        try {
-            await updateProduct(editingProduct._id, editingProduct);
-            fetchProducts();
-            setEditingProduct(null);
-        } catch (error) {
-            console.error("Error updating product:", error);
-            // Handle error (e.g., show error message to user)
-        }
-    };
+  const handleUpdateProduct = async (e) => {
+      e.preventDefault();
+      try {
+          await updateProduct(editingProduct._id, editingProduct);
+          fetchProducts();
+          setEditingProduct(null);
+          toast.success(TOAST_MESSAGES.PRODUCT_UPDATE_SUCCESS);
+      } catch (error) {
+          console.error("Error updating product:", error);
+          toast.error(TOAST_MESSAGES.PRODUCT_UPDATE_FAIL);
+      }
+  };
 
-    const handleDeleteProduct = async (id) => {
-        try {
-            await deleteProduct(id);
-            fetchProducts();
-        } catch (error) {
-            console.error("Error deleting product:", error);
-            // Handle error (e.g., show error message to user)
-        }
-    };
+  const handleDeleteProduct = async (id) => {
+      try {
+          await deleteProduct(id);
+          fetchProducts();
+          toast.success(TOAST_MESSAGES.PRODUCT_DELETE_SUCCESS);
+      } catch (error) {
+          console.error("Error deleting product:", error);
+          toast.error(TOAST_MESSAGES.PRODUCT_DELETE_FAIL);
+      }
+  };
 
     return (
         <div className={styles.myProducts}>
