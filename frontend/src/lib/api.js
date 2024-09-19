@@ -116,6 +116,8 @@ export const createProduct = async (productData) => {
 
 export const updateProduct = async (productId, productData) => {
     try {
+        console.log('Updating product with ID:', productId);
+        console.log('Update data:', productData);
         const formData = new FormData();
         for (const key in productData) {
             formData.append(key, productData[key]);
@@ -123,6 +125,7 @@ export const updateProduct = async (productId, productData) => {
         const response = await api.put(`/api/products/${productId}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
+        console.log('Update response:', response);
         return response.data;
     } catch (error) {
         console.error('Error updating product:', error.response || error);

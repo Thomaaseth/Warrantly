@@ -27,12 +27,11 @@ require('./config/config')(app);
 const authRouter = require('./routes/auth.routes');
 app.use('/auth', authRouter);
 
+const productRoutes = require('./routes/product.routes');
+app.use('/api/products', productRoutes);
+
 const allRoutes = require('./routes');
 app.use('/api', allRoutes);
-
-const productRoutes = require('./routes/product.routes');
-app.use('/api/products', isAuthenticated, productRoutes);
-
 
 
 // Error handling
