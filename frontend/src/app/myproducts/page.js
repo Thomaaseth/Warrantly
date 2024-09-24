@@ -12,6 +12,7 @@ const MyProducts = () => {
       name: '',
       dateBought: '',
       warrantyDuration: '',
+      warrantyUnit: 'years',
       invoice: null
   });
   const [editingProduct, setEditingProduct] = useState(null);
@@ -49,12 +50,21 @@ const MyProducts = () => {
       }
   };
 
+  const handleWarrantyUnitChange = (e, isEditing = false) => {
+    const { value } = e.target;
+    if (isEditing) {
+        setEditingProduct(prev => ({ ...prev, warrantyUnit: value }));
+    } else {
+        setNewProduct(prev => ({ ...prev, warrantyUnit: value }));
+    }
+  };
+
   const handleCreateProduct = async (e) => {
       e.preventDefault();
       try {
           await createProduct(newProduct);
           fetchProducts();
-          setNewProduct({ name: '', dateBought: '', warrantyDuration: '', invoice: null});
+          setNewProduct({ name: '', dateBought: '', warrantyDuration: '', warrantyUnit: 'years', invoice: null});
           toast.success(TOAST_MESSAGES.PRODUCT_CREATED_SUCCESS);
       } catch (error) {
           console.error("Error creating product:", error);
@@ -86,26 +96,45 @@ const MyProducts = () => {
       }
   };
 
-  const toggleForm = () => {
-    setIsFormVisible(!isFormVisible);
-};
+      const toggleForm = () => {
+        setIsFormVisible(!isFormVisible);
+    };
 
-const calculateWarrantyInfo = (dateBought, warrantyDuration) => {
-  const boughtDate = new Date(dateBought);
-  const years = parseInt(warrantyDuration);
-  if (isNaN(years)) {
-    return { expirationDate: 'Invalid warranty duration', daysLeft: 'N/A' };
-  }
-  const expirationDate = new Date(boughtDate.setFullYear(boughtDate.getFullYear() + years));
-  const today = new Date();
-  const timeDiff = expirationDate.getTime() - today.getTime();
-  const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
-  
-  return {
-    expirationDate: expirationDate.toLocaleDateString(),
-    daysLeft: daysLeft > 0 ? daysLeft : 0
-  };
-};
+    const calculateWarrantyInfo = (dateBought, warrantyDuration, warrantyUnit) => {
+      const boughtDate = new Date(dateBought);
+      const duration = parseInt(warrantyDuration);
+      if (isNaN(duration)) {
+        return { expirationDate: 'Invalid warranty duration', daysLeft: 'N/A' };
+      }
+      
+      let expirationDate = new Date(boughtDate);
+      if (warrantyUnit === 'years') {
+        expirationDate.setFullYear(expirationDate.getFullYear() + duration);
+      } else {
+        expirationDate.setMonth(expirationDate.getMonth() + duration);
+      }
+      
+      const today = new Date();
+      const timeDiff = expirationDate.getTime() - today.getTime();
+      const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      
+      return {
+        expirationDate: expirationDate.toLocaleDateString(),
+        daysLeft: daysLeft > 0 ? daysLeft : 0
+      };
+    };
+
+    const formatDateForInput = (dateString) => {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    };
+
+    const handleEditClick = (product) => {
+      setEditingProduct({
+        ...product,
+        dateBought: formatDateForInput(product.dateBought)
+      });
+    };
 
     return (
         <div className={styles.myProducts}>
@@ -143,15 +172,23 @@ const calculateWarrantyInfo = (dateBought, warrantyDuration) => {
                       <label htmlFor="warrantyDuration">Warranty Duration (years):</label>
                       <input
                           id="warrantyDuration"
-                          type="text"
+                          type="number"
                           name="warrantyDuration"
                           value={newProduct.warrantyDuration}
                           onChange={handleInputChange}
                           min="0"
                           step="1"
-                          placeholder="e.g., 2 years"
+                          placeholder="Enter duration"
                           required
                       />
+                      <select
+                      name="warrantyUnit"
+                      value={newProduct.warrantyUnit}
+                      onChange={(e) => handleWarrantyUnitChange(e)}
+                      >
+                        <option value="years">Years</option>
+                        <option value="months">Months</option>
+                      </select>
                   </div>
                   <div className={styles.formGroup}>
                       <label htmlFor="invoice">Invoice:</label>
@@ -169,7 +206,7 @@ const calculateWarrantyInfo = (dateBought, warrantyDuration) => {
 
             <div className={styles.productList}>
               {products.map(product => {
-                const { expirationDate, daysLeft } = calculateWarrantyInfo(product.dateBought, product.warrantyDuration);
+                const { expirationDate, daysLeft } = calculateWarrantyInfo(product.dateBought, product.warrantyDuration, product.warrantyUnit);
                 return (
                   <div key={product._id} className={styles.productCard}>
                     <div className={styles.productCardInner}>
@@ -180,7 +217,10 @@ const calculateWarrantyInfo = (dateBought, warrantyDuration) => {
                       </div>
                       <div className={styles.productCardBack}>
                         <p>Date Bought: {new Date(product.dateBought).toLocaleDateString()}</p>
-                        <p>Warranty Duration: {product.warrantyDuration} years</p>
+                        <p>Warranty Duration: {product.warrantyDuration} {product.warrantyUnit === 'years' ? 
+                          (product.warrantyDuration === '1' ? 'year' : 'years') : 
+                          (product.warrantyDuration === '1' ? 'month' : 'months')}
+                        </p>
                         {editingProduct && editingProduct._id === product._id ? (
                           <form onSubmit={handleUpdateProduct}>
                             <input
@@ -204,6 +244,14 @@ const calculateWarrantyInfo = (dateBought, warrantyDuration) => {
                               onChange={(e) => handleInputChange(e, true)}
                               required
                             />
+                              <select
+                              name="warrantyUnit"
+                              value={editingProduct.warrantyUnit}
+                              onChange={(e) => handleWarrantyUnitChange(e, true)}
+                            >
+                              <option value="years">Years</option>
+                              <option value="months">Months</option>
+                            </select>
                             <input
                               type="file"
                               name="invoice"
@@ -215,7 +263,7 @@ const calculateWarrantyInfo = (dateBought, warrantyDuration) => {
                           </form>
                         ) : (
                           <>
-                            <button onClick={() => setEditingProduct(product)}>Edit</button>
+                            <button onClick={() => handleEditClick(product)}>Edit</button>
                             <button onClick={() => handleDeleteProduct(product._id)}>Delete</button>
                           </>
                         )}

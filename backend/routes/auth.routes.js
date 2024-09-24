@@ -107,8 +107,8 @@ router.post('/login', (req, res, next) => {
 // VERIFY TOKEN STORED ON THE CLIENT
 
 router.get('/verify', isAuthenticated, (req, res, next) => {
-    console.log(`req.payload`, req.payload);
-    res.status(200).json(req.payload);
+    console.log(`req.user`, req.user);
+    res.status(200).json(req.user);
 });
 
 // UPDATE EMAIL
@@ -116,7 +116,7 @@ router.get('/verify', isAuthenticated, (req, res, next) => {
 router.put('/update-email', isAuthenticated, async (req, res) => {
     try {
       const { email } = req.body;
-      const userId = req.payload._id;
+      const userId = req.user._id;
       console.log(`Attempting to update email for user ${userId} to ${email}`);
   
       // Check if the new email is already in use
@@ -151,7 +151,7 @@ router.put('/update-email', isAuthenticated, async (req, res) => {
 router.put('/change-password', isAuthenticated, async(req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
-        const userId = req.payload._id;
+        const userId = req.user._id;
 
         const user = await User.findById(userId);
         const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
@@ -175,7 +175,7 @@ router.put('/change-password', isAuthenticated, async(req, res) => {
 
 router.delete('/delete-account', isAuthenticated, async (req, res) => {
     try {
-        const userId = req.payload._id;
+        const userId = req.user._id;
         await User.findByIdAndDelete(userId);
         res.json({ message: 'Account deleted successfully' });
     } catch (error) {

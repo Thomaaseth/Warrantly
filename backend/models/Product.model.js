@@ -13,6 +13,12 @@ const ProductModel = new mongoose.Schema({
         type: String,
         required: true
     },
+    warrantyUnit: {
+        type: String,
+        enum: ['years', 'months'],
+        default: 'years',
+        required: true
+    },
     invoiceUrl: {
         type: String,
         required: true

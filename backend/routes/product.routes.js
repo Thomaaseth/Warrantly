@@ -21,10 +21,10 @@ router.get('/', isAuthenticated, async (req, res) => {
 // Create a new product
 router.post('/', isAuthenticated, upload.single('invoice'), async (req, res) => {
   try {
-    const { name, dateBought, warrantyDuration } = req.body;
+    const { name, dateBought, warrantyDuration, warrantyUnit } = req.body;
     const invoiceUrl = req.file ? req.file.path : null;
 
-    if (!name || !dateBought || !warrantyDuration) {
+    if (!name || !dateBought || !warrantyDuration || !warrantyUnit) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -36,6 +36,7 @@ router.post('/', isAuthenticated, upload.single('invoice'), async (req, res) => 
       name,
       dateBought,
       warrantyDuration,
+      warrantyUnit,
       invoiceUrl,
       user: req.user._id
     });
@@ -56,8 +57,8 @@ router.put('/:id', isAuthenticated, upload.single('invoice'), async (req, res) =
       return res.status(400).json({ message: 'Product ID is required' });
     }
 
-    const { name, dateBought, warrantyDuration } = req.body;
-    const updateData = { name, dateBought, warrantyDuration };
+    const { name, dateBought, warrantyDuration, warrantyUnit } = req.body;
+    const updateData = { name, dateBought, warrantyDuration, warrantyUnit };
 
     if (req.file) {
       updateData.invoiceUrl = req.file.path;
