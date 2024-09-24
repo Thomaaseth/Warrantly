@@ -132,9 +132,19 @@ const MyProducts = () => {
     const handleEditClick = (product) => {
       setEditingProduct({
         ...product,
-        dateBought: formatDateForInput(product.dateBought)
+        dateBought: formatDateForInput(product.dateBought),
+        currentInvoice: product.invoiceUrl ? getFileName(product.invoiceUrl) : null
       });
     };
+
+    const getFileName = (path) => {
+      return path.split('/').pop();
+    };
+
+    const handleViewInvoice = (invoiceUrl) => {
+      window.open(invoiceUrl, '_blank');
+    };
+
 
     return (
         <div className={styles.myProducts}>
@@ -221,6 +231,9 @@ const MyProducts = () => {
                           (product.warrantyDuration === '1' ? 'year' : 'years') : 
                           (product.warrantyDuration === '1' ? 'month' : 'months')}
                         </p>
+                          {product.invoiceUrl && (
+                          <p>Invoice: <a href="#" onClick={() => handleViewInvoice(product.invoiceUrl)}>{getFileName(product.invoiceUrl)}</a></p>
+                        )}
                         {editingProduct && editingProduct._id === product._id ? (
                           <form onSubmit={handleUpdateProduct}>
                             <input
@@ -252,12 +265,15 @@ const MyProducts = () => {
                               <option value="years">Years</option>
                               <option value="months">Months</option>
                             </select>
-                            <input
-                              type="file"
-                              name="invoice"
-                              onChange={(e) => handleFileChange(e, true)}
-                              accept=".pdf,.png,.jpg,.jpeg"
-                            />
+                            <div>
+                                <p>Current Invoice: {editingProduct.currentInvoice || 'No file uploaded'}</p>
+                                <input
+                                  type="file"
+                                  name="invoice"
+                                  onChange={(e) => handleFileChange(e, true)}
+                                  accept=".pdf,.png,.jpg,.jpeg"
+                                />
+                              </div>
                             <button type="submit">Save</button>
                             <button type="button" onClick={() => setEditingProduct(null)}>Cancel</button>
                           </form>
